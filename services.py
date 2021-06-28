@@ -3,6 +3,8 @@ URLS = {
     '/test': 'Test'
 }
 
+to_monitor = []
+
 
 def parse_request(request):
     parsed = request.split(' ')
@@ -32,3 +34,23 @@ def generate_response(request):
     headers, code = generate_headers(method, url)
     body = generate_content(code, url)
     return (headers + body).encode()
+
+
+def accept_connection(server_socket):
+    client_socket, adrr = server_socket.accept()
+    print(f'Connection from {adrr[0]}:{adrr[1]}')
+
+    to_monitor.append(client_socket)
+
+
+def send_message(client_socket):
+    request = client_socket.recv(1024)
+    print(f'Receive request:{request.decode("utf-8")}')
+
+    if request:
+        response = 'Hello world\n'.encode()
+        client_socket.send(response)
+    else:
+        to_monitor.remove(client_socket)
+        client_socket.close()
+        print('Connection close\n\n')
